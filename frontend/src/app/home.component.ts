@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './auth/auth.service';
 
@@ -10,7 +10,7 @@ import { AuthService } from './auth/auth.service';
       <div class="card">
         <h1 style="margin-top:0;">Web App (app-1)</h1>
         <p style="margin:0 0 12px;">You are already logged in via Keycloak SSO.</p>
-        <p style="margin:0;"><strong>Current user:</strong> {{ userDisplayName }}</p>
+        <p style="margin:0;"><strong>Current user:</strong> {{ userDisplayName() }}</p>
       </div>
       <div style="margin-top:16px;">
         <button (click)="logout()" style="padding:10px 14px;">Sign out</button>
@@ -18,10 +18,14 @@ import { AuthService } from './auth/auth.service';
     </div>
   `,
 })
-export class HomeComponent {
-  readonly userDisplayName: string;
-  constructor(private readonly authService: AuthService) {
-    this.userDisplayName = this.authService.getUserDisplayName();
+export class HomeComponent implements OnInit {
+  readonly userDisplayName = signal('Unknown');
+
+  constructor(private readonly authService: AuthService) {}
+
+  async ngOnInit(): Promise<void> {
+    await this.authService.ensureSession();
+    this.userDisplayName.set(this.authService.getUserDisplayName());
   }
 
   logout(): void {

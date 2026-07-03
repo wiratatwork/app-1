@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    if (this.authService.isAuthenticated()) {
+    if (await this.authService.ensureSession()) {
       await this.router.navigate(['/'], { replaceUrl: true });
       return;
     }
@@ -45,32 +45,21 @@ export class LoginComponent implements OnInit {
       this.authService.clearSilentSsoAttempted();
     }
 
+    if (this.route.snapshot.queryParamMap.get('sso') === 'failed') {
+      return;
+    }
+
     if (this.authService.hasAttemptedSilentSso()) {
       return;
     }
 
     this.checkingSession.set(true);
-    try {
-      const redirecting = await this.authService.trySilentSsoLogin();
-      if (!redirecting) {
-        this.checkingSession.set(false);
-      }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'unknown error';
-      this.errorMessage.set(`Cannot check Keycloak session: ${message}`);
-      this.checkingSession.set(false);
-    }
+    this.authService.trySilentSsoLogin();
   }
 
-  async login(): Promise<void> {
+  login(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
-    try {
-      await this.authService.redirectToLogin();
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'unknown error';
-      this.errorMessage.set(`Cannot open Keycloak login: ${message}`);
-      this.loading.set(false);
-    }
+    this.authService.redirectToLogin();
   }
 }
