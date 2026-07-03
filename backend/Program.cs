@@ -1,9 +1,11 @@
 using App1.Backend.Authentication;
 using App1.Backend.Configuration;
+using App1.Backend.Data;
 using App1.Backend.Middleware;
 using App1.Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,15 +13,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<KeycloakSettings>(builder.Configuration.GetSection(KeycloakSettings.SectionName));
 builder.Services.Configure<BffSettings>(builder.Configuration.GetSection(BffSettings.SectionName));
 builder.Services.Configure<CorsSettings>(builder.Configuration.GetSection(CorsSettings.SectionName));
+builder.Services.Configure<TokenEncryptionSettings>(builder.Configuration.GetSection(TokenEncryptionSettings.SectionName));
 
-builder.Services.AddMemoryCache();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
+
+builder.Services.AddDbContextFactory<BffDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddHttpClient<KeycloakOidcService>();
+builder.Services.AddSingleton<TokenCipherService>();
 builder.Services.AddSingleton<BffSessionStore>();
 builder.Services.AddSingleton<BffCookieService>();
 builder.Services.AddSingleton<BffTokenValidator>();
 
 builder.Services.AddOpenApi();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<BffDbContext>();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 
@@ -69,6 +77,36 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<BffDbContext>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<BffDbContext>>();
+
+    var retries = 10;
+    while (retries > 0)
+    {
+        try
+        {
+            await using var db = await dbFactory.CreateDbContextAsync();
+            logger.LogInformation("Applying BFF session migrations...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("BFF session migrations applied.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            logger.LogWarning(ex, "Database not ready ({Retries} retries left).", retries);
+            if (retries == 0)
+            {
+                throw;
+            }
+
+            await Task.Delay(3000);
+        }
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {

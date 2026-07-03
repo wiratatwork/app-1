@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: app1-postgres
+    environment:
+      POSTGRES_USER: app1
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: app1
+    ports:
+      - "5434:5432"
+    volumes:
+      - app1_postgres_data:/var/lib/postgresql/data
+    networks:
+      - app1-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app1 -d app1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ./backend
@@ -6,6 +25,8 @@ services:
     container_name: app1-api
     environment:
       ASPNETCORE_URLS: http://+:5002
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION}
+      Bff__TokenEncryption__Key: ${BFF_TOKEN_ENCRYPTION_KEY}
       Keycloak__BaseUrl: http://host.docker.internal:7890
       Keycloak__PublicBaseUrl: http://localhost:7890
       Keycloak__Realm: toyota
@@ -19,12 +40,15 @@ services:
       - "5002:5002"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5002/health || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 30s
     networks:
       - app1-network
 
@@ -40,6 +64,9 @@ services:
         condition: service_healthy
     networks:
       - app1-network
+
+volumes:
+  app1_postgres_data:
 
 networks:
   app1-network:

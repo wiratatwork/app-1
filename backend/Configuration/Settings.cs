@@ -46,3 +46,11 @@ public sealed class CorsSettings
 
     public string[] AllowedOrigins { get; set; } = ["http://localhost:4201"];
 }
+
+public sealed class TokenEncryptionSettings
+{
+    public const string SectionName = "Bff:TokenEncryption";
+
+    /// <summary>Base64-encoded 32-byte AES-256 key.</summary>
+    public string Key { get; set; } = string.Empty;
+}
