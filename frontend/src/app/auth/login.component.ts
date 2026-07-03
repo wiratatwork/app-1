@@ -4,25 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Component({
+  selector: 'app-login',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div class="card" style="max-width:420px;width:100%;">
-        @if (checkingSession()) {
-          <h2 style="margin-top:0;">App-1 Login</h2>
-          <p>Checking session...</p>
-        } @else {
-          <h2 style="margin-top:0;">App-1 Login</h2>
-          <p>Use Keycloak SSO from Factory Portal.</p>
-          @if (errorMessage()) {
-            <p style="color:#b91c1c;">{{ errorMessage() }}</p>
-          }
-          <button (click)="login()" [disabled]="loading()" style="padding:10px 14px;">{{ loading() ? 'Redirecting...' : 'Login with Keycloak' }}</button>
-        }
-      </div>
-    </div>
-  `,
+  templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
   readonly loading = signal(false);

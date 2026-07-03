@@ -1,0 +1,77 @@
+<div class="ng-login-bg font-sans antialiased text-ng-slate min-h-screen bg-white">
+  <div class="min-h-screen flex flex-col lg:flex-row">
+    <aside
+      class="ng-hero-gradient hidden lg:flex lg:w-[52%] lg:min-h-screen p-8 lg:p-12 text-white flex-col justify-between border-r border-white/15"
+      aria-hidden="true"
+    >
+      <div>
+        <div class="flex items-center gap-3 mb-14">
+          <div class="h-10 w-10 rounded-xl border border-white/35 bg-white/10 flex items-center justify-center backdrop-blur-sm">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+          </div>
+          <span class="text-lg font-semibold tracking-[0.16em] uppercase">NG Report</span>
+        </div>
+        <p class="text-sky-100/90 font-medium text-xs tracking-[0.24em] uppercase mb-4">Quality Monitoring System</p>
+        <h1 class="text-3xl lg:text-4xl font-semibold leading-tight tracking-tight mb-5">
+          One sign in for<br />
+          every NG insight.
+        </h1>
+        <p class="text-sky-50/80 max-w-md leading-relaxed">
+          Analyze defect trends, monitor production quality, and keep every report in one secure workspace.
+        </p>
+      </div>
+      <div class="hidden lg:flex items-center gap-4 text-sm text-sky-100/70">
+        <span>Real-time dashboards</span>
+        <span>•</span>
+        <span>Traceable reports</span>
+        <span>•</span>
+        <span>SSO protected</span>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex items-center px-6 py-10 sm:px-10 lg:px-16">
+      <div class="surface-card w-full max-w-md mx-auto rounded-2xl p-6 sm:p-8">
+        @if (checkingSession()) {
+          <header class="mb-7">
+            <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">Checking session</h2>
+            <p class="text-ng-gray text-sm sm:text-base">Please wait while we verify your login state.</p>
+          </header>
+          <div class="rounded-lg border border-ng-border bg-ng-mist px-4 py-4 text-sm text-ng-gray flex items-center gap-3">
+            <span class="spinner spinner-dark" aria-hidden="true"></span>
+            <span>Attempting silent SSO with Keycloak...</span>
+          </div>
+        } @else {
+          <header class="mb-7">
+            <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">Sign in to NG Report</h2>
+            <p class="text-ng-gray text-sm sm:text-base">Use your Factory Portal account to continue.</p>
+          </header>
+
+          <p class="mb-6 rounded-lg border border-dashed border-ng-border bg-ng-mist px-4 py-3 text-xs text-ng-gray leading-relaxed">
+            <span class="font-medium text-ng-slate">SSO mode:</span>
+            Authentication is managed by Keycloak for enterprise access control.
+          </p>
+
+          @if (errorMessage()) {
+            <div class="mb-6 rounded-lg px-4 py-3 text-sm font-medium border bg-red-50 border-red-200 text-red-700">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <button
+            type="button"
+            (click)="login()"
+            [disabled]="loading()"
+            class="w-full h-12 rounded-lg bg-ng-blue text-white font-semibold text-sm tracking-wide uppercase transition-all duration-200 hover:bg-ng-blue-dark cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ng-blue focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <span>{{ loading() ? 'Redirecting...' : 'Sign in with Keycloak' }}</span>
+            @if (loading()) {
+              <span class="spinner" aria-hidden="true"></span>
+            }
+          </button>
+        }
+      </div>
+    </main>
+  </div>
+</div>

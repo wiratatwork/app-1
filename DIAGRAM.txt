@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant User
+    participant Portal as portal.component.ts
+    participant Guard as auth.guard.ts
+    participant AuthSvc as auth.service.ts
+    participant BFF as BffAuthController
+    participant OIDC as KeycloakOidcService
+    participant KC as Keycloak
+    participant DB as PostgreSQL
+    participant Home as home.component.ts
+
+    User->>Portal: Step1 กด tile Web App
+    Portal-->>User: Step2 เปิด :4201/?sso=1
+    User->>Guard: Step3 route '' activate
+    Guard->>AuthSvc: ensureSession
+    AuthSvc->>BFF: GET /session
+    BFF-->>AuthSvc: authenticated false
+    Guard->>AuthSvc: Step4 clearSilentSso + Step5 trySilentSso
+    AuthSvc->>BFF: GET /silent
+    BFF->>OIDC: BuildAuthorizationRequest none
+    BFF->>DB: SavePendingLogin
+    BFF-->>User: Step6-7 302 Keycloak
+    User->>KC: Step8 prompt=none + KC cookie
+    KC-->>BFF: Step9 callback code
+    BFF->>KC: Step10 token exchange
+    BFF->>DB: Step11 CreateSession encrypted
+    BFF-->>User: Set app1_bff_session redirect /
+    User->>Guard: Step12 ensureSession again
+    Guard->>BFF: GET /session
+    BFF-->>AuthSvc: authenticated true user
+    Guard->>Home: Step13 render Home

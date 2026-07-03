@@ -104,9 +104,9 @@ public sealed class BffAuthController : ControllerBase
     [HttpGet("session")]
     public async Task<ActionResult<SessionStatusResponse>> Session(CancellationToken cancellationToken)
     {
-        var sessionId = _cookieService.GetSessionId(Request);
-        var session = _sessionStore.GetSession(sessionId);
-        if (session is null)
+        var sessionId = _cookieService.GetSessionId(Request); // ดึงค่า Cookie ที่ชื่อ app1_bff_session
+        var session = _sessionStore.GetSession(sessionId); // ดึงข้อมูล Session จากฐานข้อมูล
+        if (session is null) // ถ้าไม่พบ Session ให้ส่งกลับค่า false
         {
             return Ok(new SessionStatusResponse { Authenticated = false });
         }

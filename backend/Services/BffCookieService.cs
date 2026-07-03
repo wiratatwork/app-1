@@ -32,7 +32,7 @@ public sealed class BffCookieService
     public void SetPendingLoginCookie(HttpResponse response, string pendingId)
     {
         response.Cookies.Append(PendingLoginCookieName, pendingId, BuildCookieOptions(DateTimeOffset.UtcNow.AddMinutes(10)));
-    }
+    } // ตั้งค่า Cookie ที่ชื่อ app1_bff_pending ด้วยค่า pendingId และอายุ 10 นาที
 
     public void ClearPendingLoginCookie(HttpResponse response)
     {

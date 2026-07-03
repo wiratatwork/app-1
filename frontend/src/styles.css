@@ -1,14 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
 }
 
-.card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+.ng-login-bg {
+  position: relative;
+  background-color: #eff6ff;
+  isolation: isolate;
+}
+
+.ng-login-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80");
+  background-size: cover;
+  background-position: center;
+  filter: blur(12px);
+  transform: scale(1.05);
+}
+
+.ng-login-bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 10% 16%, rgba(56, 189, 248, 0.2), transparent 36%),
+    radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.16), transparent 32%),
+    linear-gradient(165deg, rgba(248, 250, 252, 0.88), rgba(239, 246, 255, 0.94));
+}
+
+.ng-hero-gradient {
+  background:
+    linear-gradient(135deg, rgba(30, 64, 175, 0.92), rgba(37, 99, 235, 0.84), rgba(56, 189, 248, 0.55)),
+    radial-gradient(circle at 80% 20%, rgba(224, 242, 254, 0.24), transparent 48%);
+}
+
+.surface-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  box-shadow: 0 14px 34px rgba(30, 64, 175, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 9999px;
+  width: 1.125rem;
+  height: 1.125rem;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-dark {
+  border-color: rgba(148, 163, 184, 0.35);
+  border-top-color: #2563eb;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
