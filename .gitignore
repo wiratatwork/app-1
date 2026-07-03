@@ -1,13 +1,43 @@
-node_modules
-dist
-.angular
-.env
-
-# IDEs and Editors
+# Project-wide
 .vscode/
 .idea/
-
-# OS generated files
 .DS_Store
-Thumbs.db
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
+# Environment variables
+.env
+
+# Backend (.NET)
+bin/
+obj/
+.vs/
+appsettings.Development.json
+appsettings.Local.json
+appsettings.json.user
+
+# Frontend (Angular / Node)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.npm/
+frontend/.cache/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Stray artifacts from running tools at repo root
+/node_modules/
+/dist/
+/.angular/
+/src/
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
