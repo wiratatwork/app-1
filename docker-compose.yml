@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: app1-api
+    environment:
+      PORT: 5002
+      KEYCLOAK_BASE_URL: http://host.docker.internal:7890
+      KEYCLOAK_REALM: toyota
+      KEYCLOAK_CLIENT_ID: app-1
+    ports:
+      - "5002:5002"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5002/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app1-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: app1-frontend
+    ports:
+      - "4201:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app1-network
+
+networks:
+  app1-network:
+    driver: bridge
