@@ -3,9 +3,9 @@ services:
     image: postgres:16-alpine
     container_name: app1-postgres
     environment:
-      POSTGRES_USER: app1
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      POSTGRES_DB: app1
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: demo
     ports:
       - "5434:5432"
     volumes:
@@ -13,7 +13,7 @@ services:
     networks:
       - app1-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app1 -d app1"]
+      test: ["CMD-SHELL", "pg_isready -U sa -d demo"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -62,9 +62,9 @@ public sealed class BffAuthController : ControllerBase
         [FromQuery] string? error,
         CancellationToken cancellationToken)
     {
-        var pendingId = _cookieService.GetPendingLoginId(Request);
-        var pending = _sessionStore.GetPendingLogin(pendingId);
-        _cookieService.ClearPendingLoginCookie(Response);
+        var pendingId = _cookieService.GetPendingLoginId(Request); // ดึงค่า Cookie ที่ชื่อ app1_bff_pending
+        var pending = _sessionStore.GetPendingLogin(pendingId); // ดึงข้อมูล Pending Login จากฐานข้อมูล
+        _cookieService.ClearPendingLoginCookie(Response); // ลบค่า Cookie ที่ชื่อ app1_bff_pending
 
         if (!string.IsNullOrWhiteSpace(error))
         {
@@ -74,14 +74,14 @@ public sealed class BffAuthController : ControllerBase
             }
 
             return Redirect($"{_bff.PublicBaseUrl.TrimEnd('/')}{_bff.PostLogoutPath}?error={Uri.EscapeDataString(error)}");
-        }
+        }  // ถ้ามี error ให้ Login ใหม่
 
         if (pending is null || string.IsNullOrWhiteSpace(code) || !string.Equals(state, pending.State, StringComparison.Ordinal))
         {
             return Redirect($"{_bff.PublicBaseUrl.TrimEnd('/')}{_bff.PostLogoutPath}?error=invalid_callback");
-        }
+        } // ถ้าไม่พบ Pending Login หรือ code หรือ state ไม่ตรงกับ DB State ให้ Login ใหม่
 
-        _sessionStore.RemovePendingLogin(pendingId);
+        _sessionStore.RemovePendingLogin(pendingId); // ลบข้อมูล Pending Login จากฐานข้อมูล
 
         var tokens = await _oidcService.ExchangeCodeAsync(code, pending.CodeVerifier, cancellationToken);
         if (tokens is null)
@@ -95,10 +95,10 @@ public sealed class BffAuthController : ControllerBase
             return Redirect($"{_bff.PublicBaseUrl.TrimEnd('/')}{_bff.PostLogoutPath}?error=token_validation_failed");
         }
 
-        var session = _sessionStore.CreateSession(tokens, user);
-        _cookieService.SetSessionCookie(Response, session.SessionId);
+        var session = _sessionStore.CreateSession(tokens, user); // เข้ารหัส บันทึก Session Token
+        _cookieService.SetSessionCookie(Response, session.SessionId); // ตั้งค่า Cookie ที่ชื่อ app1_bff_session
 
-        return Redirect($"{_bff.PublicBaseUrl.TrimEnd('/')}{_bff.PostLoginPath}");
+        return Redirect($"{_bff.PublicBaseUrl.TrimEnd('/')}{_bff.PostLoginPath}"); // ไปหน้า HomeComponent
     }
 
     [HttpGet("session")]
