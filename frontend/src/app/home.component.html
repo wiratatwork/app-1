@@ -1,0 +1,133 @@
+<div class="app-shell">
+  <button
+    class="backdrop"
+    type="button"
+    [class.is-visible]="mobileSidebarOpen()"
+    (click)="closeMobileSidebar()"
+    aria-label="Close sidebar"
+  ></button>
+
+  <aside class="sidebar" [class.is-open]="mobileSidebarOpen()" aria-label="Primary">
+    <div class="brand-row">
+      <div class="brand-badge" aria-hidden="true">AP</div>
+      <div>
+        <p class="brand-title">App-1 Portal</p>
+        <p class="brand-subtitle">Enterprise Workspace</p>
+      </div>
+    </div>
+
+    <nav class="side-nav" aria-label="Sidebar navigation">
+      @for (item of navigationItems; track item.label) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.is-active]="item.active"
+          [attr.aria-current]="item.active ? 'page' : null"
+        >
+          <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="side-footer">
+      <p class="side-footer-title">Signed in as</p>
+      <p class="side-footer-value">{{ userDisplayName() }}</p>
+      <p class="side-footer-meta">{{ userEmail() }}</p>
+    </div>
+  </aside>
+
+  <div class="shell-main">
+    <header class="top-bar">
+      <button
+        type="button"
+        class="icon-button only-mobile"
+        (click)="toggleMobileSidebar()"
+        aria-label="Open sidebar"
+      >
+        <span aria-hidden="true">≡</span>
+      </button>
+
+      <div class="top-bar-title">
+        <h1>Factory Anomaly Dashboard</h1>
+        <p>Real-time machine abnormality monitoring with plant map context</p>
+      </div>
+
+      <div class="profile-chip" role="group" aria-label="Current user profile">
+        <div class="avatar" aria-hidden="true">{{ userInitials() }}</div>
+        <div class="profile-text">
+          <p class="profile-name">{{ userDisplayName() }}</p>
+          <p class="profile-email">{{ userEmail() }}</p>
+        </div>
+        <button type="button" class="icon-button danger" (click)="logout()" aria-label="Sign out">
+          Sign out
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="stats-grid" aria-label="Factory KPIs">
+        @for (stat of dashboardStats; track stat.label) {
+          <article class="stat-card">
+            <p class="stat-label">{{ stat.label }}</p>
+            <p class="stat-value">{{ stat.value }}</p>
+            <p class="stat-trend">{{ stat.trend }}</p>
+          </article>
+        }
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="content-card map-card" aria-labelledby="factory-map-title">
+          <div class="card-header">
+            <h2 id="factory-map-title">Factory Map</h2>
+            <p>Plant Layout A1 - Live anomaly overlay</p>
+          </div>
+
+          <div class="factory-map" role="img" aria-label="Factory map showing anomaly points">
+            <div class="map-grid"></div>
+            @for (point of mapPoints; track point.label) {
+              <button
+                type="button"
+                class="map-point"
+                [class.is-critical]="point.status === 'critical'"
+                [class.is-warning]="point.status === 'warning'"
+                [class.is-normal]="point.status === 'normal'"
+                [style.top]="point.top"
+                [style.left]="point.left"
+                [attr.aria-label]="point.label + ' status ' + point.status"
+              >
+                <span class="dot"></span>
+                <span class="point-label">{{ point.label }}</span>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="content-card alert-card" aria-labelledby="anomaly-list-title">
+          <div class="card-header">
+            <h2 id="anomaly-list-title">Machine Anomalies</h2>
+            <p>Sorted by severity and latest detection time</p>
+          </div>
+
+          <div class="alert-list">
+            @for (item of anomalyMachines; track item.machine) {
+              <article class="alert-item">
+                <div class="alert-main">
+                  <p class="alert-machine">{{ item.machine }}</p>
+                  <p class="alert-zone">{{ item.zone }}</p>
+                  <p class="alert-issue">{{ item.issue }}</p>
+                </div>
+                <div class="alert-meta">
+                  <span class="alert-badge" [class.is-critical]="item.status === 'critical'" [class.is-warning]="item.status === 'warning'">
+                    {{ item.status }}
+                  </span>
+                  <p class="alert-time">{{ item.detectedAt }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+</div>
